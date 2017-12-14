@@ -65,6 +65,11 @@ sub fix_headers {
   # Host
   my $url     = $self->url;
   my $headers = $self->headers;
+
+  # RFC 7230 3.3.2. suggests not to send Content-Length
+  # https://tools.ietf.org/html/rfc7230#section-3.3.2
+  $headers->remove('Content-Length') if $self->method eq 'GET';
+
   $headers->host($url->host_port) unless $headers->host;
 
   # Basic authentication
@@ -77,6 +82,7 @@ sub fix_headers {
   return $self unless my $info = $proxy->userinfo;
   $headers->proxy_authorization('Basic ' . b64_encode($info, ''))
     unless $headers->proxy_authorization;
+
   return $self;
 }
 
